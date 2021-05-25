@@ -1,19 +1,32 @@
 from datetime import datetime, timedelta
-from config import USERNAME, PASS, AIRTABLE_KEY, BASE_KEY, TABLE
+from config import USERNAME_L, PASS_L, USERNAME_V, PASS_V, AIRTABLE_KEY, BASE_KEY, TABLE_L, TABLE_V
 from OrderStatus import OrderStatus
 from tqdm import tqdm
 import json
 from airtable import Airtable
 from mintsoft import Mintsoft
+import sys
 
 
-def main():
+def main(argv):
+
+    try:
+        site = argv[1]
+    except IndexError:
+        print("USAGE: main.py [venlo | livi]")
+        quit()
 
     mintsoft = Mintsoft()
-    mintsoft.auth(un=USERNAME, pw=PASS)
+
+    if site == "livi":
+        mintsoft.auth(un=USERNAME_L, pw=PASS_L)
+        TABLE = TABLE_L
+    if site == "venlo":
+        TABLE = TABLE_V
+        mintsoft.auth(un=USERNAME_V, pw=PASS_V)
+
 
     yesterday = (datetime.now() - timedelta(days=1))
-
     #format date and time to ISO standard so mintsoft likes it
     yesterday = yesterday.replace(hour=0, minute=0, second=0, microsecond=0).isoformat()
 
@@ -42,7 +55,10 @@ def main():
             sold = 0
 
         #TODO add condition that ignore the SKU if all the fields are 0
-        buffer = {"SKU": p_sku, "SOLD YESTERDAY": sold, "ONHAND": on_hand , "BACKORDERS": back_orders}
+        buffer = {  "SKU_TEXT": p_sku,
+                    "SOLD YESTERDAY": sold,
+                    "ONHAND": on_hand,  
+                    "BACKORDERS": back_orders}
         full_list.append(buffer)
 
     print("updating airtable with new information")
@@ -51,15 +67,16 @@ def main():
     for item in tqdm(full_list):
         
         try:
-            record = airtable.match('SKU', item['SKU'])
+            record = airtable.match('SKU_TEXT', item['SKU_TEXT'])
             if record == {}:
                 airtable.insert(item)
             else:
                 airtable.update(record['id'], item)
         except TypeError: #TODO actually handle the exceptions in the future but this should be okay for now
+            print(item)
             continue
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
 

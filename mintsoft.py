@@ -68,8 +68,9 @@ class Mintsoft():
 
             pageno += 1
 
+            print(pageno)
             product_list = self.get_product_list(pageno)
-
+        
         return product_ids
 
 
