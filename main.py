@@ -50,11 +50,14 @@ def main():
 
     for item in tqdm(full_list):
         
-        record = airtable.match('SKU', item['SKU'])
-        if record == {}:
-            airtable.batch_insert(item)
-        else:
-            airtable.update(record['id'], item)
+        try:
+            record = airtable.match('SKU', item['SKU'])
+            if record == {}:
+                airtable.batch_insert(item)
+            else:
+                airtable.update(record['id'], item)
+        except TypeError: #TODO actually handle the exceptions in the future but this should be okay for now
+            continue
 
 
 if __name__ == "__main__":
