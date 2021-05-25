@@ -53,7 +53,7 @@ def main():
         try:
             record = airtable.match('SKU', item['SKU'])
             if record == {}:
-                airtable.batch_insert(item)
+                airtable.insert(item)
             else:
                 airtable.update(record['id'], item)
         except TypeError: #TODO actually handle the exceptions in the future but this should be okay for now
