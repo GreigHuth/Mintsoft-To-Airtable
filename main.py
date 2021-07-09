@@ -5,7 +5,9 @@ from tqdm import tqdm
 import json
 from airtable import Airtable
 from mintsoft import Mintsoft
+import requests
 import sys
+from time import sleep
 
 
 def main(argv):
@@ -40,7 +42,7 @@ def main(argv):
     full_list = []
 
     print("getting onhand and backorder info per sku...")
-    for p_id, p_sku in tqdm(product_ids):
+    for p_id, p_sku in tqdm(product_ids):#tqdm does the progress bar
 
         try:
             product_inv = mintsoft.get_product_inv(p_id)[0]        
@@ -66,15 +68,25 @@ def main(argv):
 
     for item in tqdm(full_list):
         
-        try:
-            record = airtable.match('SKU_TEXT', item['SKU_TEXT'])
-            if record == {}:
-                airtable.insert(item)
-            else:
-                airtable.update(record['id'], item)
-        except TypeError: #TODO actually handle the exceptions in the future but this should be okay for now
-            print(item)
-            continue
+        while True:#try to update table until it gets updated
+            try:
+                record = airtable.match('SKU_TEXT', item['SKU_TEXT'])
+                if record == {}:
+                    airtable.insert(item)
+                else:
+                    airtable.update(record['id'], item)
+
+                break #break while loop
+
+            except TypeError: #TODO actually handle the exceptions in the future but this should be okay for now
+                print(item)
+                break #break while loop
+
+            except requests.HTTPError :
+                sleep(1)
+                print("HTTP error, retrying")
+
+
 
 
 if __name__ == "__main__":
