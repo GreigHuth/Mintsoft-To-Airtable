@@ -6,4 +6,4 @@ Wrote this while i was working for a certain clothing company.
 Its pretty unfinished but maybe someone might find it useful.
 
 #Known Bugs
-Airtable only allows 5 requests per second, so it sometimes crashes, i wrote code to fix it but i lost it. ¯\_(ツ)_/¯
+Airtable only allows 5 requests per second, so it sometimes crashes, i wrote code to fix it but i lost it. ¯\\_(ツ)_/¯
